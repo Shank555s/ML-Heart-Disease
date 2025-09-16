@@ -1,0 +1,4 @@
+,value
+model_file,models\heart_model.joblib
+scikit_learn_version,1.5.2
+notes,RandomForest pipeline trained with GridSearchCV
