@@ -15,7 +15,7 @@ from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 import joblib
 
 # Paths
-DATA_PATH = Path("heart_1000_correlated.csv")  # your 1000-record CSV
+DATA_PATH = Path("heart_1000.csv")  # your 1000-record CSV
 MODEL_DIR = Path("models")
 MODEL_DIR.mkdir(exist_ok=True)
 MODEL_PATH = MODEL_DIR / "heart_model.cbm"
