@@ -1,37 +1,27 @@
 #!/usr/bin/env python3
 """
-app.py - simple Flask API to serve heart disease predictions.
-POST /predict with JSON:
-{
-  "features": [63, 1, 3, 145, 233, 1, 0, 150, 0, 2.3, 0, 0, 1]
-}
-or
-{
-  "columns": ["age","sex",...],
-  "data": [[...], [...]]
-}
+app.py - Flask API + frontend for Heart Disease prediction using CatBoost.
 """
-from flask import Flask, request, jsonify, render_template
-import joblib
-import os
-import pandas as pd       
-import numpy as np
 
-MODEL_PATH = os.environ.get("MODEL_PATH", "models/heart_model.joblib")
+from flask import Flask, request, jsonify, render_template
+from catboost import CatBoostClassifier, Pool
+import pandas as pd
+import numpy as np
+import os
+
+MODEL_PATH = os.environ.get("MODEL_PATH", "models/heart_model.cbm")
 app = Flask(__name__)
 
+# Load CatBoost model at startup
+model = CatBoostClassifier()
+model.load_model(MODEL_PATH)
+
+# Define categorical columns (as per training)
+CATEGORICAL_FEATURES = ["sex","cp","fbs","restecg","exang","slope","ca","thal"]
+
 @app.route("/", methods=["GET"])
-def index():   # <-- changed from 'home' to 'index'
+def index():
     return render_template("index.html")
-
-# Load model at startup
-model = joblib.load(MODEL_PATH)
-
-@app.route("/", methods=["GET"])
-def home():
-    return {
-        "message": "✅ Heart Disease Prediction API is running. Use POST on /predict with JSON input."
-    }
 
 
 @app.route("/health", methods=["GET"])
@@ -39,40 +29,32 @@ def health():
     return jsonify({"status": "ok"})
 
 
-def validate_input_json(payload: dict):
-    if "features" in payload:
-        features = payload["features"]
-        X = np.array(features)
-        if X.ndim == 1:
-            X = X.reshape(1, -1)
-        return X
-    elif "data" in payload and "columns" in payload:
-        data = payload["data"]
-        return np.array(data)
-    else:
-        raise ValueError("Invalid input format. Use 'features' or 'columns'+'data'.")
-
-
 @app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.json
 
-        # Check if frontend sent "columns" + "data"
+        # Frontend can send "columns" + "data" or a single dict of features
         if "columns" in data and "data" in data:
             df = pd.DataFrame(data["data"], columns=data["columns"])
-        # Or raw JSON format (single record)
         else:
             df = pd.DataFrame([data])
 
-        # Make prediction
-        prediction = model.predict(df)[0]
-        probability = model.predict_proba(df)[0][1]
+        # Ensure categorical columns are integers
+        for col in CATEGORICAL_FEATURES:
+            if col in df.columns:
+                df[col] = df[col].astype(int)
 
-        # Always return arrays for frontend compatibility
+        # Prepare CatBoost Pool
+        pool = Pool(df, cat_features=[c for c in CATEGORICAL_FEATURES if c in df.columns])
+
+        # Predict
+        prediction = model.predict(pool)
+        probability = model.predict_proba(pool)[:, 1]
+
         return jsonify({
-            "prediction": [int(prediction)],
-            "probability": [float(probability)]
+            "prediction": prediction.astype(int).tolist(),
+            "probability": probability.astype(float).tolist()
         })
 
     except Exception as e:
