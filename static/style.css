@@ -1,61 +1,100 @@
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: #f4f6f8;
+    background: linear-gradient(135deg, #74ABE2, #5563DE);
     margin: 0;
     padding: 0;
+    color: #333;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
-    max-width: 700px;
-    margin: 50px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 720px;
+    padding: 30px 40px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    animation: fadeIn 0.7s ease-in-out;
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #2c3e50;
+    margin-bottom: 20px;
 }
 
 form .grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px 20px;
 }
 
 form label {
     display: block;
+    font-weight: 600;
     margin-bottom: 5px;
-    font-weight: bold;
+    color: #333;
 }
 
 form input {
     width: 100%;
-    padding: 8px;
-    border-radius: 5px;
+    padding: 8px 10px;
+    border-radius: 8px;
     border: 1px solid #ccc;
+    transition: all 0.2s ease;
+}
+
+form input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    outline: none;
 }
 
 form button {
-    margin-top: 20px;
-    padding: 12px 20px;
+    margin-top: 25px;
+    padding: 14px 20px;
     width: 100%;
     background: #007bff;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
+    font-size: 17px;
     cursor: pointer;
-    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    transition: all 0.25s ease;
 }
 
 form button:hover {
     background: #0056b3;
+    transform: scale(1.03);
 }
 
 #result {
-    margin-top: 20px;
+    margin-top: 25px;
     text-align: center;
     font-size: 20px;
+    color: #333;
+}
+
+#result .safe {
+    color: #28a745;
+    font-weight: bold;
+}
+
+#result .danger {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
